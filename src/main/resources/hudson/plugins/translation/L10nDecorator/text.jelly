@@ -28,11 +28,13 @@ THE SOFTWARE.
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
   <l:ajax>
     <j:forEach var="e" items="${it.decode(request)}">
-      <div><st:out value="${e.english}"/></div>
-      <input type="hidden" name="bundle" value="${e.resourceBundle}" />
-      <input type="hidden" name="key" value="${e.key}" />
-      <textarea name="original" style="display:none;"><st:out value="${e.localizedText}"/></textarea>
-      <textarea name="text"><st:out value="${e.localizedText}"/></textarea>
+      <div class="${e.isLocalized()?'localized':null}">
+        <div><st:out value="${e.english}"/></div>
+        <input type="hidden" name="bundle" value="${e.resourceBundle}" />
+        <input type="hidden" name="key" value="${e.key}" />
+        <textarea name="original" style="display:none;"><st:out value="${e.localizedText}"/></textarea>
+        <textarea name="text"><st:out value="${e.localizedText}"/></textarea>
+      </div>
     </j:forEach>
   </l:ajax>
 </j:jelly>

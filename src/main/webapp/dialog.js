@@ -44,6 +44,7 @@ translation.createDialog = function() {
     this.post("dialog","ja",function(rsp) {
         // populate the dialog
         d.innerHTML = rsp.responseText;
+        Behaviour.applySubtree(d);
 
         translation.dialog = new YAHOO.widget.Dialog(d, {
             width : "40em",
@@ -71,5 +72,14 @@ translation.reload = function(sel) {
         $('l10n-main').innerHTML = rsp.responseText;
     });
 };
+
+// called to decide whether or not to display the already translated messages
+translation.toggleMode = function(checkbox) {
+    var d = checkbox.checked?"block":"none";
+    findElementsBySelector($("l10n-dialog"),".localized").each(function (e) {
+        e.style.display = d;
+    });
+};
+
 
 translation.createDialog();

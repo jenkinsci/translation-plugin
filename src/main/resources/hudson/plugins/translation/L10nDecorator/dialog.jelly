@@ -29,18 +29,23 @@ THE SOFTWARE.
   <l:ajax>
     <style>
       #l10n-dialog textarea { width:90% }
+      #l10n-dialog .localized { display:none; }
     </style>
     <l:yui module="resize" suffix="-beta" />
     <div class="hd">${%Help us localize this page}</div>
     <div class="bd">
       <form method="POST" action="about:blank">
-        <div style="margin-bottom:0.2em">
+        <div>
           ${%Locale}:
           <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
             <j:forEach var="e" items="${it.listLocales()}">
               <f:option value="${e.code}" selected="${e.matchesRequestLocale()}">${e.name}</f:option>
             </j:forEach>
           </select>
+        </div>
+        <div style="margin-bottom:0.2em">
+          <input type="checkbox" onchange="translation.toggleMode(this)" />
+          <label class="attach-previous">${%Show already translated text}</label>
         </div>
         <!--
           the latest YUI doesn't appear to require the body height to have the scroll bar displayed

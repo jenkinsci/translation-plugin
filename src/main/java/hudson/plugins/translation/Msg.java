@@ -31,8 +31,18 @@ public final class Msg {
         return msg;
     }
 
+    /**
+     * Gets the localized messages for the current request locale.
+     */
     public String getLocalizedText() {
-        return resourceBundle.getFormatString(Stapler.getCurrentRequest().getLocale(),key);
+        return resourceBundle.getFormatStringWithoutDefaulting(Stapler.getCurrentRequest().getLocale(),key);
+    }
+
+    /**
+     * Is this message already localized for the current request locale?
+     */
+    public boolean isLocalized() {
+        return getLocalizedText()!=null;
     }
 
     @Override
