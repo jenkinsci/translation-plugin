@@ -35,6 +35,7 @@ translation.createDialog = function() {
     var d = $("l10n-dialog");
     new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/dialog", {
         method:"post",
+        requestHeaders:{"Accept-Language":"ja"},
         parameters:{bundles:translation.bundles},
         onSuccess: function(rsp) {
             // populate the dialog
@@ -58,6 +59,20 @@ translation.createDialog = function() {
             translation.launchDialog();
         }
     });
-}
+};
+
+// called when locale selection combo box is updated.
+// make an AJAX call to the server to fetch the locale specific list.
+translation.reload = function(sel) {
+    new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/text", {
+        method:"post",
+        requestHeaders:{"Accept-Language":sel.value},
+        parameters:{bundles:translation.bundles},
+
+        onSuccess: function(rsp) {
+            $('l10n-main').innerHTML = rsp.responseText;
+        }
+    });
+};
 
 translation.createDialog();

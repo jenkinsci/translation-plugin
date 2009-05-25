@@ -25,7 +25,7 @@ THE SOFTWARE.
 <!--
   Called from the dialog.js to render the dialog content HTML
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:f="/lib/form">
   <l:ajax>
     <style>
       #l10n-dialog textarea { width:90% }
@@ -33,12 +33,12 @@ THE SOFTWARE.
     <l:yui module="resize" suffix="-beta" />
     <div class="hd">Help us localize this page</div>
     <div class="bd">
-      <form method="POST" action="http://www.g">
+      <form method="POST" action="about:blank">
         <div style="margin-bottom:0.2em">
           Locale:
-          <select name="locale" id="l10n-locale">
+          <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
             <j:forEach var="e" items="${it.listLocales()}">
-              <option value="${e.code}">${e.name}</option>
+              <f:option value="${e.code}" selected="${e.matchesRequestLocale()}">${e.name}</f:option>
             </j:forEach>
           </select>
         </div>
@@ -49,10 +49,7 @@ THE SOFTWARE.
           which is necessary for the scrollbar to kick in.
          -->
         <div style="overflow-y:scroll; height: 25em" id="l10n-main">
-          <j:forEach var="e" items="${it.decode(request)}">
-            <div><st:out value="${e.english}"/></div>
-            <textarea><st:out value="${e.text}"/></textarea>
-          </j:forEach>
+          <st:include page="text.jelly" />
         </div>
       </form>
     </div>

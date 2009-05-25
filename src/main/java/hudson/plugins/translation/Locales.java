@@ -1,7 +1,10 @@
 package hudson.plugins.translation;
 
+import org.kohsuke.stapler.Stapler;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -10,10 +13,22 @@ public class Locales {
     public static final class Entry {
         public final String name;
         public final String code;
+        public final Locale locale;
 
         public Entry(String name, String code) {
             this.name = name;
             this.code = code;
+
+            String[] tokens = code.split("_");
+            if(tokens.length==1)
+                this.locale = new Locale(tokens[0]);
+            else
+                this.locale = new Locale(tokens[0],tokens[1]);
+
+        }
+
+        public boolean matchesRequestLocale() {
+            return Stapler.getCurrentRequest().getLocale().toString().equals(code);
         }
     }
 
