@@ -70,22 +70,22 @@ translation.createDialog = function() {
 };
 
 translation.submit = function() {
-    function send(url,onSuccess) {
-        new Ajax.Request(url, {
-            method: "post",
-            parameters : Form.serialize($('l10n-form')),
-            onSuccess : onSuccess,
-            onFailure : function(rsp) {
-                alert("Failed to submit the localization to "+url+": " + rsp.status + " " + rsp.statusText);
-            }
-        });
-    }
-
     var dialog = this;
-    send(rootURL + "/descriptor/hudson.plugins.translation.L10nDecorator/submit", function () {
-        send("http://www.hudson-ci.org/l10n/submit", function() {
+    var f = $('l10n-form');
+    f.elements['json'].value = buildFormTree(f);
+
+    new Ajax.Request(rootURL + "/descriptor/hudson.plugins.translation.L10nDecorator/submit", {
+        method: "post",
+        parameters : Form.serialize(f),
+        onSuccess : function(rsp) {
+            // push them to two places, just in case one is down
+            loadScript("http://www.hudson-ci.org/l10n/submit?"+rsp.responseText);
+            loadScript("https://hudson.dev.java.net/contributed-l10n.js?"+rsp.responseText);
             dialog.hide();
-        });
+        },
+        onFailure : function(rsp) {
+            alert("Failed to submit the localization: " + rsp.status + " " + rsp.statusText);
+        }
     });
 };
 

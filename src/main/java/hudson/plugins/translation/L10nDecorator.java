@@ -1,15 +1,22 @@
 package hudson.plugins.translation;
 
 import com.trilead.ssh2.crypto.Base64;
+import com.sun.mail.util.BASE64EncoderStream;
 import hudson.Extension;
+import hudson.Util;
 import hudson.plugins.translation.Locales.Entry;
 import hudson.model.Hudson;
 import hudson.model.PageDecorator;
+import hudson.model.UsageStatistics.CombinedCipherOutputStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.WebApp;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.jelly.InternationalizedStringExpressionListener;
 import org.kohsuke.stapler.jelly.ResourceBundle;
+import org.kohsuke.stapler.jelly.JellyFacet;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -18,18 +25,26 @@ import static javax.crypto.Cipher.ENCRYPT_MODE;
 import static javax.crypto.Cipher.DECRYPT_MODE;
 import static javax.servlet.http.HttpServletResponse.SC_ACCEPTED;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.OutputStreamWriter;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
+
+import net.sf.json.JSONObject;
 
 /**
  * {@link PageDecorator} that adds the translation dialog.
@@ -38,8 +53,17 @@ import java.util.zip.GZIPInputStream;
  */
 @Extension
 public class L10nDecorator extends PageDecorator {
+    public final ContributedL10nStore store = new ContributedL10nStore();
+    private final ResourceBundleFactoryImpl bundleFactory = new ResourceBundleFactoryImpl(store);
+    private final Hudson hudson;
+
     public L10nDecorator() {
         super(L10nDecorator.class);
+
+        // hook into Stapler to activate contributed l10n
+        hudson = Hudson.getInstance();
+        WebApp.get(hudson.servletContext).getFacet(JellyFacet.class).resourceBundleFactory
+                = bundleFactory;
     }
 
     public List<Locales.Entry> listLocales() {
@@ -91,7 +115,7 @@ public class L10nDecorator extends PageDecorator {
     private Cipher getCipher(int mode) {
         try {
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(mode, Hudson.getInstance().getSecretKeyAsAES128());
+            cipher.init(mode, hudson.getSecretKeyAsAES128());
             return cipher;
         } catch (GeneralSecurityException e) {
             throw new Error(e); // impossible
@@ -122,19 +146,54 @@ public class L10nDecorator extends PageDecorator {
         return null;
     }
 
+    public static final class SubmissionEntry {
+        public final String text, baseName, key;
+
+        @DataBoundConstructor
+        public SubmissionEntry(String text, String baseName, String key) {
+            this.text = text;
+            this.baseName = baseName;
+            this.key = key;
+        }
+    }
+
     /**
      * Handles the submission from the browser.
      */
-    public void doSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        if(!Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
+    public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
+        if(!hudson.hasPermission(Hudson.ADMINISTER)) {
             // let the browser know that this server isn't willing to reflect the submission immediately.
             rsp.setStatus(SC_ACCEPTED);
             return;
         }
 
-        for (Msg msg : decode(req)) {
-            System.out.println(msg.key);
+        JSONObject json = req.getSubmittedForm();
+
+        // organize contributions by baseName
+        Map<String,Properties> updates = new HashMap<String,Properties>();
+        for (SubmissionEntry e : req.bindJSONToList(SubmissionEntry.class, json.get("entry"))) {
+            Properties p = updates.get(e.baseName);
+            if(p==null) {
+                p = new Properties();
+                store.loadTo(locale,e.baseName,p);
+            }
+            p.put(e.key,e.text);
         }
+
+        // then write them back
+        for (Map.Entry<String,Properties> p : updates.entrySet())
+            store.save(locale,p.getKey(),p.getValue());
+        bundleFactory.clearCache();
+
+        json.remove("bundles"); // we don't need this bulky data send to Hudson project website
+        json.put("id", UUID.randomUUID().toString()); // simplifies the correlation between multiple posting sites
+        json.put("installation", Util.getDigestOf(hudson.getSecretKey()));
+
+        // write back the data that the browser should then submit to the Hudson website
+        rsp.setContentType("text/plain;charset=UTF-8");
+        OutputStreamWriter w = new OutputStreamWriter(new GZIPOutputStream(new BASE64EncoderStream(rsp.getOutputStream())),"UTF-8");
+        json.write(w);
+        w.close();
 
         rsp.setStatus(SC_OK);
     }

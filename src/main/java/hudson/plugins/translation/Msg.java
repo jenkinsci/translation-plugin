@@ -25,6 +25,10 @@ public final class Msg {
         this.key = key;
     }
 
+    public String getBaseName() {
+        return resourceBundle.getBaseName();
+    }
+
     public String getEnglish() {
         String msg = resourceBundle.getFormatString(Locale.ENGLISH, key);
         if(msg==null)   msg=key;
