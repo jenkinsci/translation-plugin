@@ -30,48 +30,45 @@ translation.launchDialog = function() {
     this.dialog.show();
 };
 
+translation.post = function(link,lang,onSuccess) {
+    new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/"+link, {
+        method:"post",
+        requestHeaders:{"Accept-Language":lang},
+        parameters:{bundles:translation.bundles},
+        onSuccess: onSuccess });
+};
+
 // instantiate the Dialog
 translation.createDialog = function() {
     var d = $("l10n-dialog");
-    new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/dialog", {
-        method:"post",
-        requestHeaders:{"Accept-Language":"ja"},
-        parameters:{bundles:translation.bundles},
-        onSuccess: function(rsp) {
-            // populate the dialog
-            d.innerHTML = rsp.responseText;
-            
-            translation.dialog = new YAHOO.widget.Dialog(d, {
-                width : "40em",
-                visible : false,
-                draggable: true,
-                constraintoviewport: true,
-                buttons : [
-                    { text:"Submit", handler:function() {
-                        this.submit();
-                    }, isDefault:true },
-                    { text:"Cancel", handler:function() {
-                        this.cancel();
-                    } }
-                ]
-            });
-            translation.dialog.render();
-            translation.launchDialog();
-        }
+    this.post("dialog","ja",function(rsp) {
+        // populate the dialog
+        d.innerHTML = rsp.responseText;
+
+        translation.dialog = new YAHOO.widget.Dialog(d, {
+            width : "40em",
+            visible : false,
+            draggable: true,
+            constraintoviewport: true,
+            buttons : [
+                { text:"Submit", handler:function() {
+                    this.submit();
+                }, isDefault:true },
+                { text:"Cancel", handler:function() {
+                    this.cancel();
+                } }
+            ]
+        });
+        translation.dialog.render();
+        translation.launchDialog();
     });
 };
 
 // called when locale selection combo box is updated.
 // make an AJAX call to the server to fetch the locale specific list.
 translation.reload = function(sel) {
-    new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/text", {
-        method:"post",
-        requestHeaders:{"Accept-Language":sel.value},
-        parameters:{bundles:translation.bundles},
-
-        onSuccess: function(rsp) {
-            $('l10n-main').innerHTML = rsp.responseText;
-        }
+    this.post("text",sel.value,function(rsp) {
+        $('l10n-main').innerHTML = rsp.responseText;
     });
 };
 
