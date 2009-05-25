@@ -24,53 +24,21 @@ THE SOFTWARE.
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
   <j:if test="${request.getParameter('l10n')!=null}">
-    <div id="l10n-dialog" class="dialog">
-      <style>
-        #l10n-dialog textarea { width:90% }
-      </style>
-      <l:yui module="resize" suffix="-beta" />
-      <div class="hd">Help us localize this page</div>
-      <div class="bd">
-        <!--
-          the latest YUI doesn't appear to require the body height to have the scroll bar displayed
-          (just specifying the height property in the constructor would do)
-          but in 2.5.1, we need to do it the other way, or else the body section doesn't get a fixed height,
-          which is necessary for the scrollbar to kick in.
-         -->
-        <div style="overflow-y:scroll; height: 25em">
-          <form method="POST" action="http://www.g">
-            <j:forEach var="res" items="${it.getRecording(request)}">
-              <div><st:out value="${res.english}"/></div>
-              <textarea>${res.text}</textarea>
-            </j:forEach>
-          </form>
-        </div>
-      </div>
-    </div>
+    <!-- content of the dialog will be populated when the dialog is opened --> 
+    <div id="l10n-dialog" class="dialog" />
+    
     <script>
-      // Instantiate the Dialog
-      var dialog1 = new YAHOO.widget.Dialog("l10n-dialog",
-                  { width : "40em",
-                    visible : false,
-                    draggable: true,
-                    constraintoviewport: true,
-                    buttons : [ { text:"Submit", handler:function() {this.submit()}, isDefault:true },
-                          { text:"Cancel", handler:function() {this.cancel()} } ]
-                  });
-<!-- resize support doesn't seem to work
-      var resize = new YAHOO.util.Resize("l10n-dialog", {
-            handles: ['br'],
-            autoRatio: false,
-            status: false
-      });
-      resize.on('resize', function(args) {
-          var panelHeight = args.height;
-          this.cfg.setProperty("height", panelHeight + "px");
-      }, dialog1, true);
--->
-      dialog1.render();
+      var translation={}; <!-- filled by dialog.js -->
+      translation.bundles = "${it.encodeRecording(request)}";
 
+      function showTranslationDialog() {
+        if(!translation.launchDialog)
+          loadScript("${rootURL}/plugin/translation/dialog.js");
+        else
+          translation.launchDialog();
+        return false; <!-- cancel the event -->
+      }
     </script>
-    <a href='#' onclick="dialog1.center();dialog1.show(); return false;">show dialog</a>
+    <a href='#' onclick="return showTranslationDialog();">l10n dialog</a>
   </j:if>
 </j:jelly>

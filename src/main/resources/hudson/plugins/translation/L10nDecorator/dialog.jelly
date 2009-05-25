@@ -1,0 +1,60 @@
+<!--
+The MIT License
+
+Copyright (c) 2004-2009, Sun Microsystems, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<!--
+  Called from the dialog.js to render the dialog content HTML
+-->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
+  <l:ajax>
+    <style>
+      #l10n-dialog textarea { width:90% }
+    </style>
+    <l:yui module="resize" suffix="-beta" />
+    <div class="hd">Help us localize this page</div>
+    <div class="bd">
+      <form method="POST" action="http://www.g">
+        <div style="margin-bottom:0.2em">
+          Locale:
+          <select name="locale" id="l10n-locale">
+            <j:forEach var="e" items="${it.listLocales()}">
+              <option value="${e.code}">${e.name}</option>
+            </j:forEach>
+          </select>
+        </div>
+        <!--
+          the latest YUI doesn't appear to require the body height to have the scroll bar displayed
+          (just specifying the height property in the constructor would do)
+          but in 2.5.1, we need to do it the other way, or else the body section doesn't get a fixed height,
+          which is necessary for the scrollbar to kick in.
+         -->
+        <div style="overflow-y:scroll; height: 25em" id="l10n-main">
+          <j:forEach var="e" items="${it.decode(request)}">
+            <div><st:out value="${e.english}"/></div>
+            <textarea><st:out value="${e.text}"/></textarea>
+          </j:forEach>
+        </div>
+      </form>
+    </div>
+  </l:ajax>
+</j:jelly>
