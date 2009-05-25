@@ -29,7 +29,7 @@ THE SOFTWARE.
     <div id="l10n-footer" style="display:none; float:left">
       <a href='#' onclick="return showTranslationDialog();">
         <img src="${rootURL}/plugin/translation/flags.png" />
-        Help us localize this page
+        $(%Help us localize this page}
       </a>
     </div>
     <script>

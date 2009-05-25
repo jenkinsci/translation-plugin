@@ -31,11 +31,11 @@ THE SOFTWARE.
       #l10n-dialog textarea { width:90% }
     </style>
     <l:yui module="resize" suffix="-beta" />
-    <div class="hd">Help us localize this page</div>
+    <div class="hd">${%Help us localize this page}</div>
     <div class="bd">
       <form method="POST" action="about:blank">
         <div style="margin-bottom:0.2em">
-          Locale:
+          ${%Locale}:
           <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
             <j:forEach var="e" items="${it.listLocales()}">
               <f:option value="${e.code}" selected="${e.matchesRequestLocale()}">${e.name}</f:option>
