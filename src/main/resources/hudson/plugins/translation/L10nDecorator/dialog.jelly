@@ -35,7 +35,7 @@ THE SOFTWARE.
     <l:yui module="cookie" suffix="-beta" />
     <div class="hd">${%Help us localize this page}</div>
     <div class="bd">
-      <form method="POST" action="about:blank">
+      <form id="l10n-form" name="l10n-form" method="POST" action="http://www.hudson-ci.org/l10n/submit">
         <div>
           ${%Locale}:
           <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
@@ -44,6 +44,10 @@ THE SOFTWARE.
             </j:forEach>
           </select>
         </div>
+
+        <!-- post back the encrypted bundle list to help server verify that there's no tampering -->
+        <input type="hidden" name="bundles" />
+
         <div style="margin-bottom:0.2em">
           <input type="checkbox" onchange="translation.toggleMode(this)" />
           <label class="attach-previous">${%Show already translated text}</label>

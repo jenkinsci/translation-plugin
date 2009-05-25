@@ -7,6 +7,7 @@ import hudson.model.Hudson;
 import hudson.model.PageDecorator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.jelly.InternationalizedStringExpressionListener;
 import org.kohsuke.stapler.jelly.ResourceBundle;
 
@@ -15,6 +16,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.CipherInputStream;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 import static javax.crypto.Cipher.DECRYPT_MODE;
+import static javax.servlet.http.HttpServletResponse.SC_ACCEPTED;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.ByteArrayInputStream;
@@ -117,5 +120,22 @@ public class L10nDecorator extends PageDecorator {
         }
 
         return null;
+    }
+
+    /**
+     * Handles the submission from the browser.
+     */
+    public void doSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        if(!Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
+            // let the browser know that this server isn't willing to reflect the submission immediately.
+            rsp.setStatus(SC_ACCEPTED);
+            return;
+        }
+
+        for (Msg msg : decode(req)) {
+            System.out.println(msg.key);
+        }
+
+        rsp.setStatus(SC_OK);
     }
 }

@@ -52,6 +52,7 @@ translation.createDialog = function() {
         // populate the dialog
         d.innerHTML = rsp.responseText;
         Behaviour.applySubtree(d);
+        $("l10n-form").elements['bundles'].value=translation.bundles;
 
         translation.dialog = new YAHOO.widget.Dialog(d, {
             width : "40em",
@@ -59,16 +60,32 @@ translation.createDialog = function() {
             draggable: true,
             constraintoviewport: true,
             buttons : [
-                { text:"Submit", handler:function() {
-                    this.submit();
-                }, isDefault:true },
-                { text:"Cancel", handler:function() {
-                    this.cancel();
-                } }
+                { text:"Submit", handler: translation.submit, isDefault:true },
+                { text:"Cancel", handler:function() { this.cancel(); } }
             ]
         });
         translation.dialog.render();
         translation.launchDialog();
+    });
+};
+
+translation.submit = function() {
+    function send(url,onSuccess) {
+        new Ajax.Request(url, {
+            method: "post",
+            parameters : Form.serialize($('l10n-form')),
+            onSuccess : onSuccess,
+            onFailure : function(rsp) {
+                alert("Failed to submit the localization to "+url+": " + rsp.status + " " + rsp.statusText);
+            }
+        });
+    }
+
+    var dialog = this;
+    send(rootURL + "/descriptor/hudson.plugins.translation.L10nDecorator/submit", function () {
+        send("http://www.hudson-ci.org/l10n/submit", function() {
+            dialog.hide();
+        });
     });
 };
 
