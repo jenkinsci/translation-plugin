@@ -7,7 +7,6 @@ import hudson.Util;
 import hudson.plugins.translation.Locales.Entry;
 import hudson.model.Hudson;
 import hudson.model.PageDecorator;
-import hudson.model.UsageStatistics.CombinedCipherOutputStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -176,6 +175,7 @@ public class L10nDecorator extends PageDecorator {
             if(p==null) {
                 p = new Properties();
                 store.loadTo(locale,e.baseName,p);
+                updates.put(e.baseName,p);
             }
             p.put(e.key,e.text);
         }
