@@ -14,7 +14,6 @@ import org.kohsuke.stapler.WebApp;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.jelly.InternationalizedStringExpressionListener;
-import org.kohsuke.stapler.jelly.ResourceBundle;
 import org.kohsuke.stapler.jelly.JellyFacet;
 
 import javax.crypto.Cipher;
@@ -106,7 +105,7 @@ public class L10nDecorator extends PageDecorator {
         List<Msg> l = new ArrayList<Msg>();
         String s;
         while((s=r.readLine())!=null) {
-            l.add(new Msg(new ResourceBundle(s),r.readLine()));
+            l.add(new Msg(bundleFactory.create(s),r.readLine()));
         }
         return l;
     }
