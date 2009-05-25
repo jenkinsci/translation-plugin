@@ -24,10 +24,21 @@ THE SOFTWARE.
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
   <j:if test="${request.getParameter('l10n')!=null}">
-    <!-- content of the dialog will be populated when the dialog is opened --> 
-    <div id="l10n-dialog" class="dialog" />
-    
+    <!-- content of the dialog will be populated when the dialog is opened -->
+    <div id='l10n-dialog' class='dialog' />
+    <div id="l10n-footer" style="display:none; float:left">
+      <a href='#' onclick="return showTranslationDialog();">
+        <img src="${rootURL}/plugin/translation/flags.png" />
+        Help us localize this page
+      </a>
+    </div>
     <script>
+      <!-- move the link into the footer -->
+      var footer = document.getElementById('l10n-footer');
+      var f = document.getElementById('footer');
+      f.insertBefore(footer,f.firstChild);
+      footer.style.display="block";
+
       var translation={}; <!-- filled by dialog.js -->
       translation.bundles = "${it.encodeRecording(request)}";
 
@@ -39,6 +50,5 @@ THE SOFTWARE.
         return false; <!-- cancel the event -->
       }
     </script>
-    <a href='#' onclick="return showTranslationDialog();">l10n dialog</a>
   </j:if>
 </j:jelly>
