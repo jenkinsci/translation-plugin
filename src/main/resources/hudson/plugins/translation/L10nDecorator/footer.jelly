@@ -41,6 +41,7 @@ THE SOFTWARE.
 
       var translation={}; <!-- filled by dialog.js -->
       translation.bundles = "${it.encodeRecording(request)}";
+      translation.detectedLocale = "${it.getPrimaryTranslationLocale(request)}";
 
       function showTranslationDialog() {
         if(!translation.launchDialog)

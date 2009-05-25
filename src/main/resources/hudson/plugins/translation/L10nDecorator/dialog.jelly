@@ -32,6 +32,7 @@ THE SOFTWARE.
       #l10n-dialog .localized { display:none; }
     </style>
     <l:yui module="resize" suffix="-beta" />
+    <l:yui module="cookie" suffix="-beta" />
     <div class="hd">${%Help us localize this page}</div>
     <div class="bd">
       <form method="POST" action="about:blank">

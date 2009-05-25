@@ -11,13 +11,24 @@ import java.util.Locale;
  */
 public class Locales {
     public static final class Entry {
+        /**
+         * Human readable display name of this locale, like "Japanese"
+         */
         public final String name;
+        /**
+         * Locale identifier like "ja" or "en_US".
+         */
         public final String code;
+        /**
+         * The same as {@link #code}, but in lower case.
+         */
+        public final String lcode;
         public final Locale locale;
 
         public Entry(String name, String code) {
             this.name = name;
             this.code = code;
+            this.lcode = code.toLowerCase(Locale.ENGLISH);
 
             String[] tokens = code.split("_");
             if(tokens.length==1)

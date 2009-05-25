@@ -2,6 +2,7 @@ package hudson.plugins.translation;
 
 import com.trilead.ssh2.crypto.Base64;
 import hudson.Extension;
+import hudson.plugins.translation.Locales.Entry;
 import hudson.model.Hudson;
 import hudson.model.PageDecorator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -23,6 +24,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -93,4 +95,27 @@ public class L10nDecorator extends PageDecorator {
         }
     }
 
+    /**
+     * Looks at {@code Accept-Language} header manually and decide which locale
+     * this user is likely capable of translating.
+     */
+    public String getPrimaryTranslationLocale(StaplerRequest req) {
+        String lang = req.getHeader("Accept-Language");
+        if(lang==null)  return null;
+
+        for (String t : lang.split(",")) {
+            // ignore q=N
+            int idx = t.indexOf(';');
+            if(idx>=0)  t=t.substring(0,idx);
+
+            // HTTP uses en-US but Java uses en_US
+            t=t.replace('-','_').toLowerCase(Locale.ENGLISH);
+
+            for (Entry e : Locales.LIST)
+                if(t.startsWith(e.lcode)) // so that 'en_US' matches 'en'.
+                    return e.code;
+        }
+
+        return null;
+    }
 }

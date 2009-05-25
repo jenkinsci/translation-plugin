@@ -25,6 +25,10 @@ THE SOFTWARE.
 // stores a reference to the dialog
 translation.dialog = null;
 
+// import statement
+translation.Cookie = YAHOO.util.Cookie;
+
+
 translation.launchDialog = function() {
     this.dialog.center();
     this.dialog.show();
@@ -33,7 +37,7 @@ translation.launchDialog = function() {
 translation.post = function(link,lang,onSuccess) {
     new Ajax.Request(rootURL+"/descriptor/hudson.plugins.translation.L10nDecorator/"+link, {
         method:"post",
-        requestHeaders:{"Accept-Language":lang},
+        requestHeaders:{"Accept-Language":lang.replace('_','-')},
         parameters:{bundles:translation.bundles},
         onSuccess: onSuccess });
 };
@@ -41,7 +45,10 @@ translation.post = function(link,lang,onSuccess) {
 // instantiate the Dialog
 translation.createDialog = function() {
     var d = $("l10n-dialog");
-    this.post("dialog","ja",function(rsp) {
+    var l = this.Cookie.get("l10n-locale");
+    if(l==null) l=this.detectedLocale;
+
+    this.post("dialog",l,function(rsp) {
         // populate the dialog
         d.innerHTML = rsp.responseText;
         Behaviour.applySubtree(d);
@@ -68,6 +75,9 @@ translation.createDialog = function() {
 // called when locale selection combo box is updated.
 // make an AJAX call to the server to fetch the locale specific list.
 translation.reload = function(sel) {
+    // remember the locale selection so that we can choose this next time the user clicks this.
+    this.Cookie.set("l10n-locale",sel.value,{expires:new Date("January 1, 2030"),path:"/"});
+
     this.post("text",sel.value,function(rsp) {
         $('l10n-main').innerHTML = rsp.responseText;
     });
