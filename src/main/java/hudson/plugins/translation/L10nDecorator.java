@@ -21,7 +21,6 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.CipherInputStream;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 import static javax.crypto.Cipher.DECRYPT_MODE;
-import static javax.servlet.http.HttpServletResponse.SC_ACCEPTED;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -159,30 +158,28 @@ public class L10nDecorator extends PageDecorator {
      * Handles the submission from the browser.
      */
     public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
-        if(!hudson.hasPermission(Hudson.ADMINISTER)) {
-            // let the browser know that this server isn't willing to reflect the submission immediately.
-            rsp.setStatus(SC_ACCEPTED);
-            return;
-        }
-
         JSONObject json = req.getSubmittedForm();
 
-        // organize contributions by baseName
-        Map<String,Properties> updates = new HashMap<String,Properties>();
-        for (SubmissionEntry e : req.bindJSONToList(SubmissionEntry.class, json.get("entry"))) {
-            Properties p = updates.get(e.baseName);
-            if(p==null) {
-                p = new Properties();
-                store.loadTo(locale,e.baseName,p);
-                updates.put(e.baseName,p);
-            }
-            p.put(e.key,e.text);
-        }
+        if(hudson.hasPermission(Hudson.ADMINISTER)) {
+            // let this submission reflected to this Hudson right away
 
-        // then write them back
-        for (Map.Entry<String,Properties> p : updates.entrySet())
-            store.save(locale,p.getKey(),p.getValue());
-        bundleFactory.clearCache();
+            // organize contributions by baseName
+            Map<String,Properties> updates = new HashMap<String,Properties>();
+            for (SubmissionEntry e : req.bindJSONToList(SubmissionEntry.class, json.get("entry"))) {
+                Properties p = updates.get(e.baseName);
+                if(p==null) {
+                    p = new Properties();
+                    store.loadTo(locale,e.baseName,p);
+                    updates.put(e.baseName,p);
+                }
+                p.put(e.key,e.text);
+            }
+
+            // then write them back
+            for (Map.Entry<String,Properties> p : updates.entrySet())
+                store.save(locale,p.getKey(),p.getValue());
+            bundleFactory.clearCache();
+        }
 
         json.remove("bundles"); // we don't need this bulky data send to Hudson project website
         json.put("id", UUID.randomUUID().toString()); // simplifies the correlation between multiple posting sites
