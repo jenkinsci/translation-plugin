@@ -30,6 +30,7 @@ THE SOFTWARE.
     <style>
       #l10n-dialog textarea { width:90% }
       #l10n-dialog .localized { display:none; }
+      #l10n-dialog .caption { float:left; width:40%; }
     </style>
     <l:yui module="resize" suffix="-beta" />
     <l:yui module="cookie" suffix="-beta" />
@@ -41,12 +42,16 @@ THE SOFTWARE.
     <div class="bd">
       <form id="l10n-form" name="l10n-form" method="POST" action="http://www.hudson-ci.org/l10n/submit">
         <div>
-          ${%Locale}:
+          <div class="caption">${%Locale}:</div>
           <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
             <j:forEach var="e" items="${it.listLocales()}">
               <f:option value="${e.code}" selected="${e.matchesRequestLocale()}">${e.name}</f:option>
             </j:forEach>
           </select>
+        </div>
+        <div>
+          <div class="caption">${%optionalName}:</div>
+          <input type="text" name="submitter" />
         </div>
 
         <!-- post back the encrypted bundle list to help server verify that there's no tampering -->

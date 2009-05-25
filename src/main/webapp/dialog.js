@@ -53,6 +53,7 @@ translation.createDialog = function() {
         d.innerHTML = rsp.responseText;
         Behaviour.applySubtree(d);
         $("l10n-form").elements['bundles'].value=translation.bundles;
+        $("l10n-form").elements['submitter'].value=translation.Cookie.get("l10n-submitter");
 
         translation.dialog = new YAHOO.widget.Dialog(d, {
             width : "40em",
@@ -73,6 +74,8 @@ translation.submit = function() {
     var dialog = this;
     var f = $('l10n-form');
     f.elements['json'].value = buildFormTree(f);
+    translation.Cookie.set("l10n-submitter",$("l10n-form").elements['submitter'].value,
+        {expires:new Date("January 1, 2030"),path:"/"});
 
     new Ajax.Request(rootURL + "/descriptor/hudson.plugins.translation.L10nDecorator/submit", {
         method: "post",
@@ -92,7 +95,7 @@ translation.submit = function() {
 // called when locale selection combo box is updated.
 // make an AJAX call to the server to fetch the locale specific list.
 translation.reload = function(sel) {
-    // remember the locale selection so that we can choose this next time the user clicks this.
+    // remember the setting so that the user doesn't have to choose it every time
     this.Cookie.set("l10n-locale",sel.value,{expires:new Date("January 1, 2030"),path:"/"});
 
     this.post("text",sel.value,function(rsp) {
