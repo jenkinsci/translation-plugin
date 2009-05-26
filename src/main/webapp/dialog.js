@@ -81,7 +81,8 @@ translation.submit = function() {
         method: "post",
         parameters : Form.serialize(f),
         onSuccess : function(rsp) {
-            // push them to two places, just in case one is down
+            // loadScript("http://localhost:9050/l10n/submit?"+rsp.responseText);
+            // push them to two places,  just in case one is down
             loadScript("http://www.hudson-ci.org/l10n/submit?"+rsp.responseText);
             loadScript("https://hudson.dev.java.net/contributed-l10n.js?"+rsp.responseText);
             dialog.hide();
