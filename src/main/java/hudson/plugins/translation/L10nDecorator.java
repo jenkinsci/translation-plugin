@@ -144,13 +144,18 @@ public class L10nDecorator extends PageDecorator {
     }
 
     public static final class SubmissionEntry {
-        public final String text, baseName, key;
+        public final String text, baseName, key, original;
 
         @DataBoundConstructor
-        public SubmissionEntry(String text, String baseName, String key) {
+        public SubmissionEntry(String text, String baseName, String key, String original) {
             this.text = text;
             this.baseName = baseName;
             this.key = key;
+            this.original = original;
+        }
+
+        public boolean isUpdated() {
+            return !original.equals(text);
         }
     }
 
@@ -166,6 +171,8 @@ public class L10nDecorator extends PageDecorator {
             // organize contributions by baseName
             Map<String,Properties> updates = new HashMap<String,Properties>();
             for (SubmissionEntry e : req.bindJSONToList(SubmissionEntry.class, json.get("entry"))) {
+                if(!e.isUpdated())  continue;
+
                 Properties p = updates.get(e.baseName);
                 if(p==null) {
                     p = new Properties();
@@ -184,6 +191,7 @@ public class L10nDecorator extends PageDecorator {
         json.remove("bundles"); // we don't need this bulky data send to Hudson project website
         json.put("id", UUID.randomUUID().toString()); // simplifies the correlation between multiple posting sites
         json.put("installation", Util.getDigestOf(hudson.getSecretKey()));
+        json.put("version", hudson.VERSION);
 
         // write back the data that the browser should then submit to the Hudson website
         rsp.setContentType("text/plain;charset=UTF-8");
