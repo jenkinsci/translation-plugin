@@ -54,6 +54,7 @@ translation.createDialog = function() {
         Behaviour.applySubtree(d);
         $("l10n-form").elements['bundles'].value=translation.bundles;
         $("l10n-form").elements['submitter'].value=translation.Cookie.get("l10n-submitter");
+        $("l10n-form").elements['contribute'].checked=(translation.Cookie.get("l10n-license-agreed")=="true");
 
         translation.dialog = new YAHOO.widget.Dialog(d, {
             width : "40em",
@@ -74,17 +75,22 @@ translation.submit = function() {
     var dialog = this;
     var f = $('l10n-form');
     f.elements['json'].value = buildFormTree(f);
-    translation.Cookie.set("l10n-submitter",$("l10n-form").elements['submitter'].value,
-        {expires:new Date("January 1, 2030"),path:"/"});
+    var contributeToHudson = $("l10n-form").elements['contribute'].checked;
+
+    var cookieParams = {expires:new Date("January 1, 2030"),path:"/"};
+    translation.Cookie.set("l10n-submitter",        $("l10n-form").elements['submitter'].value,cookieParams);
+    translation.Cookie.set("l10n-license-agreed",   contributeToHudson?"true":"false",cookieParams);
 
     new Ajax.Request(rootURL + "/descriptor/hudson.plugins.translation.L10nDecorator/submit", {
         method: "post",
         parameters : Form.serialize(f),
         onSuccess : function(rsp) {
-            // loadScript("http://localhost:9050/l10n/submit?"+rsp.responseText);
-            // push them to two places,  just in case one is down
-            loadScript("http://www.hudson-ci.org/l10n/submit?"+rsp.responseText);
-            loadScript("https://hudson.dev.java.net/contributed-l10n.js?"+rsp.responseText);
+            if (contributeToHudson) {
+                // loadScript("http://localhost:9050/l10n/submit?"+rsp.responseText);
+                // push them to two places,  just in case one is down
+                loadScript("http://www.hudson-ci.org/l10n/submit?"+rsp.responseText);
+                loadScript("https://hudson.dev.java.net/contributed-l10n.js?"+rsp.responseText);
+            }
             dialog.hide();
         },
         onFailure : function(rsp) {

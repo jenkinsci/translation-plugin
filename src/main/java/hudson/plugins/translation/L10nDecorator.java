@@ -71,8 +71,6 @@ public class L10nDecorator extends PageDecorator {
      * Activate the recording of the localized resources.
      */
     public void startRecording(StaplerRequest request) {
-        if(request.getParameter("l10n")==null)  return;
-
         request.setAttribute(InternationalizedStringExpressionListener.class.getName(), new MsgRecorder());
     }
 

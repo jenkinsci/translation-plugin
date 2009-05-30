@@ -57,6 +57,12 @@ THE SOFTWARE.
         <!-- post back the encrypted bundle list to help server verify that there's no tampering -->
         <input type="hidden" name="bundles" />
 
+        <div>
+          <input type="checkbox" name="contribute" />
+          <label class="attach-previous"><a href="https://cti.sunvirtuallab.com/community/resources/CommunityTranslationTools_TOU.html">
+            ${%I contribute my translations to the Hudson project}
+          </a></label>
+        </div>
         <div style="margin-bottom:0.2em">
           <input type="checkbox" onchange="translation.toggleMode(this)" />
           <label class="attach-previous">${%Show already translated text}</label>

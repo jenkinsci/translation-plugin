@@ -23,4 +23,5 @@ THE SOFTWARE.
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
   <j:set var="_" value="${it.startRecording(request)}"/>
+  <l:yui module="cookie" suffix='-beta' />
 </j:jelly>
