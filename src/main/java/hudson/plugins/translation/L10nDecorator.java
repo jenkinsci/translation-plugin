@@ -133,9 +133,15 @@ public class L10nDecorator extends PageDecorator {
             // HTTP uses en-US but Java uses en_US
             t=t.replace('-','_').toLowerCase(Locale.ENGLISH);
 
+            // First, look for an exact matching, so that 'en_US' matches 'en_US' and not 'en_UK' nor 'en'
             for (Entry e : Locales.LIST)
-                if(t.startsWith(e.lcode)) // so that 'en_US' matches 'en'.
-                    return e.code;
+                if(t.equals(e.lcode))
+                    return e.lcode;
+
+            // Eventually,  look for the generic locale, so that 'en_US' matches 'en'
+            for (Entry e : Locales.LIST)
+                if(t.startsWith(e.lcode))
+                    return e.lcode;
         }
 
         return null;
