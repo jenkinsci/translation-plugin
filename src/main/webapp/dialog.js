@@ -88,13 +88,18 @@ translation.submit = function() {
             if (contributeToHudson) {
                 // loadScript("http://localhost:9050/l10n/submit?"+rsp.responseText);
                 // push them to two places,  just in case one is down
-                loadScript("http://www.hudson-ci.org/l10n/submit?"+rsp.responseText);
+                loadScript("http://l10n.hudson-labs.org/submit?"+rsp.responseText);
                 loadScript("https://hudson.dev.java.net/contributed-l10n.js?"+rsp.responseText);
             }
             dialog.hide();
         },
         onFailure : function(rsp) {
-            alert("Failed to submit the localization: " + rsp.status + " " + rsp.statusText);
+            var err = new YAHOO.widget.Panel("l10n-error", { width:"480px", visible:true, modal:true } );
+            err.setHeader("Failed to submit the localization: " + rsp.status + " " + rsp.statusText);
+            err.setBody(rsp.responseText);
+            err.render("main-table");
+            err.center();
+            err.show();
         }
     });
 };
