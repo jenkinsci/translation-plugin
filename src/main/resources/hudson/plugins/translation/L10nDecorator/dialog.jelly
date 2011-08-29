@@ -61,7 +61,7 @@ THE SOFTWARE.
 
         <div>
           <input type="checkbox" name="contribute" />
-          <label class="attach-previous"><a href="https://cti.sunvirtuallab.com/community/resources/CommunityTranslationTools_TOU.html">
+          <label class="attach-previous"><a href="https://wiki.jenkins-ci.org/display/JENKINS/License+of+contribution+to+Jenkins+translation">
             ${%I contribute my translations to the Jenkins project}
           </a></label>
         </div>
