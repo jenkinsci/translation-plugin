@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 public class ContributedL10nStore {
-    private final Hudson hudson = Hudson.getInstance();
+    private final Hudson jenkins = Hudson.getInstance();
 
     public void loadTo(String locale, String baseName, Properties props) {
         File d = getDir(locale);
@@ -59,7 +59,7 @@ public class ContributedL10nStore {
     }
 
     /**
-     * The base name of a resource is an absolute URL, which often includes the version number of Hudson.
+     * The base name of a resource is an absolute URL, which often includes the version number of Jenkins.
      * So trim it back to just contain the classpath portion.
      *
      * For example, file:/.../glassfish/domains/domain1/generated/jsp/j2ee-modules/hudson/loader/lib/hudson/buildHealth
@@ -86,7 +86,7 @@ public class ContributedL10nStore {
     }
 
     private File getDir(String locale) {
-        return new File(hudson.getRootDir(), "contributed-localizations/" + locale);
+        return new File(jenkins.getRootDir(), "contributed-localizations/" + locale);
     }
 
     private static final Pattern JSP_LOADER_PATTERN = Pattern.compile("generated/jsp/(.+)/loader/");
