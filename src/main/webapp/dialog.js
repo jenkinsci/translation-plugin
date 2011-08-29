@@ -74,7 +74,7 @@ translation.createDialog = function() {
 translation.submit = function() {
     var dialog = this;
     var f = $('l10n-form');
-    f.elements['json'].value = buildFormTree(f);
+    buildFormTree(f);
     var contributeToHudson = $("l10n-form").elements['contribute'].checked;
 
     var cookieParams = {expires:new Date("January 1, 2030"),path:"/"};
