@@ -9,7 +9,7 @@
   <artifactId>translation</artifactId>
   <version>1.8-SNAPSHOT</version>
   <packaging>hpi</packaging>
-  <name>Jenkins Translation Assitance plugin</name>
+  <name>Jenkins Translation Assistance plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Translation+Assistance+Plugin</url>
 
   <scm>
