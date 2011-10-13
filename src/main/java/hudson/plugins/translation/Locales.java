@@ -64,6 +64,7 @@ public class Locales {
         "Czech","cs",
         "Danish","da",
         "Dutch"	,"nl",
+        "English (British)","en_GB",
         "Esperanto","eo",
         "Estonian","et",
         "Faroese","fo",
