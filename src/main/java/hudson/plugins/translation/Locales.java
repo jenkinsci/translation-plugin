@@ -66,6 +66,7 @@ public class Locales {
         "Dutch"	,"nl",
         "Esperanto","eo",
         "Estonian","et",
+        "Faroese","fo",
         "Finnish","fi",
         "French","fr",
         "Frisian","fy_NL",
