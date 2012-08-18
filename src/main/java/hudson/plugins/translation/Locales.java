@@ -108,6 +108,7 @@ public class Locales {
         "Spanish","es",
         "Spanish (Argentina)","es_AR",
         "Swedish","sv_SE",
+        "Tamil","ta",
         "Telgu","te",
         "Thai","th",
         "Turkish","tr",
