@@ -33,6 +33,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Map;
@@ -75,7 +76,8 @@ public class L10nDecorator extends PageDecorator {
     }
 
     public Collection<Msg> getRecording(StaplerRequest request) {
-        return ((MsgRecorder)request.getAttribute(InternationalizedStringExpressionListener.class.getName())).set;
+        MsgRecorder recording = (MsgRecorder) request.getAttribute(InternationalizedStringExpressionListener.class.getName());
+        return recording != null ? recording.set : Collections.<Msg>emptySet();
     }
 
     public String encodeRecording(StaplerRequest request) throws IOException {
