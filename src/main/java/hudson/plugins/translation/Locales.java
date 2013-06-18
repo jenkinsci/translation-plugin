@@ -93,7 +93,7 @@ public class Locales {
         "Marathi","mr",
         "Mongolian","mn",
         "Norwegian (Bokmål)","nb_NO",
-        "Norwegian (Lengadocian)","nn_NO",
+        "Norwegian (Nynorsk)","nn_NO",
         "Occitan (Lengadocian)","oc",
         "Polish","pl",
         "Portuguese (Brazilian)","pt_BR",
