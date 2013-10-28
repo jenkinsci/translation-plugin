@@ -171,6 +171,9 @@ public class L10nDecorator extends PageDecorator {
     public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
         JSONObject json = req.getSubmittedForm();
 
+        if (locale.equals(""))
+            throw new IOException("No locale selected");
+
         if(hudson.hasPermission(Hudson.ADMINISTER)) {
             // let this submission reflected to this Hudson right away
 

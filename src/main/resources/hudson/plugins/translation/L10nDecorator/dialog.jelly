@@ -46,6 +46,7 @@ THE SOFTWARE.
         <div>
           <div class="caption">${%Locale}:</div>
           <select name="locale" id="l10n-locale" onchange="translation.reload(this)">
+            <option value="">(select)</option>
             <j:forEach var="e" items="${it.listLocales()}">
               <f:option value="${e.code}" selected="${e.matchesRequestLocale()}">${e.name}</f:option>
             </j:forEach>
