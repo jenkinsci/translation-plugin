@@ -23,6 +23,7 @@ THE SOFTWARE.
 -->
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout">
+<l:hasPermission permission="${app.READ}">
   <!-- content of the dialog will be populated when the dialog is opened -->
   <div id='l10n-dialog' class='dialog' />
   <div id="l10n-footer" style="display:none; float:left">
@@ -50,4 +51,5 @@ THE SOFTWARE.
       return false; <!-- cancel the event -->
     }
   </script>
+</l:hasPermission>
 </j:jelly>
