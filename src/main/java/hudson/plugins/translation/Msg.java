@@ -54,7 +54,7 @@ public final class Msg {
         if (o == null || getClass() != o.getClass()) return false;
 
         Msg that = (Msg) o;
-        return this.key.equals(that.key) && that.resourceBundle.equals(that.resourceBundle);
+        return this.key.equals(that.key) && this.resourceBundle.equals(that.resourceBundle);
     }
 
     @Override
