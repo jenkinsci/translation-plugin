@@ -18,6 +18,38 @@
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
     <tag>HEAD</tag>
   </scm>
+  
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>3.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+          <failOnError>true</failOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-findbugs</id>
+            <phase>verify</phase> 
+            <goals>
+              <goal>check</goal> 
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
     <repositories>
         <repository>
