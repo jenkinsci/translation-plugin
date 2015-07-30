@@ -1,5 +1,6 @@
 package hudson.plugins.translation;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.Locale;
  * @author Kohsuke Kawaguchi
  */
 public class Locales {
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", 
+            justification = "We expose it as API")
     public static final class Entry {
         /**
          * Human readable display name of this locale, like "Japanese"
@@ -31,10 +34,11 @@ public class Locales {
             this.lcode = code.toLowerCase(Locale.ENGLISH);
 
             String[] tokens = code.split("_");
-            if(tokens.length==1)
+            if(tokens.length==1) {
                 this.locale = new Locale(tokens[0]);
-            else
+            } else {
                 this.locale = new Locale(tokens[0],tokens[1]);
+            }
 
         }
 

@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
  */
 public class ContributedL10nStore {
     private final Hudson jenkins = Hudson.getInstance();
+    private static final Logger LOGGER = Logger.getLogger(ContributedL10nStore.class.getName());
 
     public void loadTo(String locale, String baseName, Properties props) {
         File d = getDir(locale);
@@ -40,14 +43,20 @@ public class ContributedL10nStore {
                 in.close();
             }
         } catch (IOException e) {
-            f.delete();
+            // We supress all errors here
+            LOGGER.log(Level.WARNING, "Cannot load translation of "+baseName+" to locale "+locale, e);
+            if (!f.delete()) {
+                LOGGER.log(Level.WARNING, "Cannot delete localization file {0}", f);
+            }
         }
         props.putAll(override);
     }
 
     public void save(String locale, String baseName, Properties props) throws IOException {
         File d = getDir(locale);
-        if(!d.exists()) d.mkdirs();
+        if(!d.exists() && !d.mkdirs()) {
+            throw new IOException("Cannot create directory "+d);
+        }
 
         File f = new File(d,Util.getDigestOf(trim(baseName)));
         FileOutputStream out = new FileOutputStream(f);
@@ -78,7 +87,7 @@ public class ContributedL10nStore {
                 return baseName.substring(m.end()-1); // the pattern matches the first '/', hence -1
         }
         if (baseName.startsWith("jar:")) {
-            int idx = baseName.lastIndexOf("!");
+            int idx = baseName.lastIndexOf('!');
             return baseName.substring(idx+1);
         }
         // couldn't figure it out

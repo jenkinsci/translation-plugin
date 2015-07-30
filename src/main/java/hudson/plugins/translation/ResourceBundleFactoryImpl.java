@@ -4,6 +4,7 @@ import org.kohsuke.stapler.jelly.ResourceBundle;
 import org.kohsuke.stapler.jelly.ResourceBundleFactory;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link ResourceBundleFactory} to inject contributed localization.
@@ -20,7 +21,7 @@ final class ResourceBundleFactoryImpl extends ResourceBundleFactory {
     @Override
     public ResourceBundle create(String baseName) {
         return new ResourceBundle(baseName) {
-            private int modCount = reloadModCount;
+            private int modCount = reloadModCount.get();
             @Override
             protected Properties wrapUp(String locale, Properties props) {
                 store.loadTo(locale,getBaseName(),props);
@@ -28,22 +29,33 @@ final class ResourceBundleFactoryImpl extends ResourceBundleFactory {
             }
             @Override
             protected Properties get(String key) {
-                int mc = reloadModCount;
+                int mc = reloadModCount.get();
                 if (modCount!=mc) {
-                    clearCache();
+                    ResourceBundleFactoryImpl.this.clearCache();
                     modCount = mc;
                 }
                 return super.get(key);
             }
+
+            @Override
+            public boolean equals(Object o) {
+                // Modifications count should not been taken into account in equals() 
+                return super.equals(o);
+            }
+            
+            @Override
+            public int hashCode() {
+                return super.hashCode();
+            }       
         };
     }
 
     /**
      * Used to force the reloading of a cache.
      */
-    private volatile int reloadModCount = 0;
+    private final AtomicInteger reloadModCount = new AtomicInteger();
 
     public void clearCache() {
-        reloadModCount++;
+        reloadModCount.incrementAndGet();
     }
 }

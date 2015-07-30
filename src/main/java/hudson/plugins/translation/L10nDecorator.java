@@ -29,6 +29,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
@@ -83,7 +85,8 @@ public class L10nDecorator extends PageDecorator {
     public String encodeRecording(StaplerRequest request) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         // string -> gzip -> encrypt -> base64 -> string
-        PrintStream w = new PrintStream(new GZIPOutputStream(new CipherOutputStream(baos,getCipher(ENCRYPT_MODE))));
+        PrintStream w = new PrintStream(new GZIPOutputStream(new CipherOutputStream(baos,getCipher(ENCRYPT_MODE))), 
+            false, "UTF-8");
         for (Msg e : getRecording(request)) {
             w.println(e.resourceBundle.getBaseName());
             w.println(e.key);
@@ -97,9 +100,17 @@ public class L10nDecorator extends PageDecorator {
      * Does the opposite of {@link #encodeRecording(StaplerRequest)}.
      */
     public List<Msg> decode(StaplerRequest request) throws IOException {
-        BufferedReader r = new BufferedReader(new InputStreamReader(new GZIPInputStream(new CipherInputStream(
+        final GZIPInputStream gzipInpurStream = new GZIPInputStream(new CipherInputStream(
                 new ByteArrayInputStream(Base64.decode(request.getParameter("bundles").toCharArray())),
-                getCipher(DECRYPT_MODE)))));
+                getCipher(DECRYPT_MODE)));  
+        final BufferedReader r;
+        try {
+            //TODO: Replace by StandardCharsets in JDK7
+            r = new BufferedReader(new InputStreamReader(gzipInpurStream, "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new IOException("UTF-8 encoding is not supported .This should never happen" +
+                    ", because it's a part of Java standard starting from Java 5", ex);
+        }
 
         List<Msg> l = new ArrayList<Msg>();
         String s;
