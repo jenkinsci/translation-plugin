@@ -11,7 +11,15 @@
   <packaging>hpi</packaging>
   <name>Jenkins Translation Assistance plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Translation+Assistance+Plugin</url>
-
+  
+  <licenses>
+    <license>
+      <name>The MIT license</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
