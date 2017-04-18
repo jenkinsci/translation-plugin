@@ -1,12 +1,12 @@
 package hudson.plugins.translation;
 
-import com.trilead.ssh2.crypto.Base64;
 import com.sun.mail.util.BASE64EncoderStream;
 import hudson.Extension;
 import hudson.Util;
 import hudson.plugins.translation.Locales.Entry;
 import hudson.model.Hudson;
 import hudson.model.PageDecorator;
+import hudson.remoting.Base64;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -30,7 +30,6 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
@@ -93,7 +92,7 @@ public class L10nDecorator extends PageDecorator {
         }
         w.close();
 
-        return new String(Base64.encode(baos.toByteArray()));
+        return Base64.encode(baos.toByteArray());
     }
 
     /**
@@ -101,7 +100,7 @@ public class L10nDecorator extends PageDecorator {
      */
     public List<Msg> decode(StaplerRequest request) throws IOException {
         final GZIPInputStream gzipInpurStream = new GZIPInputStream(new CipherInputStream(
-                new ByteArrayInputStream(Base64.decode(request.getParameter("bundles").toCharArray())),
+                new ByteArrayInputStream(Base64.decode(request.getParameter("bundles"))),
                 getCipher(DECRYPT_MODE)));  
         final BufferedReader r;
         try {
