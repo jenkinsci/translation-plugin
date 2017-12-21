@@ -13,6 +13,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.WebApp;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.kohsuke.stapler.jelly.InternationalizedStringExpressionListener;
 import org.kohsuke.stapler.jelly.JellyFacet;
 
@@ -179,6 +180,7 @@ public class L10nDecorator extends PageDecorator {
     /**
      * Handles the submission from the browser.
      */
+    @RequirePOST
     public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
         JSONObject json = req.getSubmittedForm();
 
