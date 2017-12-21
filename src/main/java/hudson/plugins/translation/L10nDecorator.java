@@ -183,7 +183,7 @@ public class L10nDecorator extends PageDecorator {
         JSONObject json = req.getSubmittedForm();
 
         if (StringUtils.isBlank(locale)){
-            rsp.sendError(400, "No locale selecte");
+            rsp.sendError(400, "No locale selected");
             return;
         }
 
