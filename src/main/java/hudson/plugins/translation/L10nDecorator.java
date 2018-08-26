@@ -8,6 +8,7 @@ import hudson.plugins.translation.Locales.Entry;
 import hudson.model.Hudson;
 import hudson.model.PageDecorator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.WebApp;
@@ -31,7 +32,6 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
@@ -184,8 +184,10 @@ public class L10nDecorator extends PageDecorator {
     public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
         JSONObject json = req.getSubmittedForm();
 
-        if (locale.equals(""))
-            throw new IOException("No locale selected");
+        if (StringUtils.isBlank(locale)){
+            rsp.sendError(400, "No locale selected");
+            return;
+        }
 
         if(hudson.hasPermission(Hudson.ADMINISTER)) {
             // let this submission reflected to this Hudson right away
