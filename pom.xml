@@ -23,6 +23,14 @@
      <jenkins.version>1.580</jenkins.version>
      <java.level>6</java.level>
    </properties>
+  
+  <licenses>
+    <license>
+      <name>The MIT license</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <repositories>
     <repository>
