@@ -3,6 +3,7 @@ package hudson.plugins.translation;
 import org.kohsuke.stapler.jelly.ResourceBundle;
 import org.kohsuke.stapler.jelly.ResourceBundleFactory;
 
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,13 +14,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 final class ResourceBundleFactoryImpl extends ResourceBundleFactory {
     private final ContributedL10nStore store;
+    private ResourceBundleFactory parentFactory;
 
-    ResourceBundleFactoryImpl(ContributedL10nStore store) {
+    ResourceBundleFactoryImpl(ContributedL10nStore store, ResourceBundleFactory parentFactory) {
         this.store = store;
+        this.parentFactory = parentFactory;
     }
 
     @Override
     public ResourceBundle create(String baseName) {
+        final ResourceBundle resourceBundle = this.parentFactory.create(baseName);
+
         return new ResourceBundle(baseName) {
             private int modCount = reloadModCount.get();
             @Override
@@ -38,6 +43,24 @@ final class ResourceBundleFactoryImpl extends ResourceBundleFactory {
             }
 
             @Override
+            public String getFormatString(Locale locale, String key) {
+                String text =  super.getFormatString(locale, key);
+                if(text == null) {
+                    text = resourceBundle.getFormatString(locale, key);
+                }
+                return text;
+            }
+
+            @Override
+            public String getFormatStringWithoutDefaulting(Locale locale, String key) {
+                String text = super.getFormatStringWithoutDefaulting(locale, key);
+                if(text == null) {
+                    text = resourceBundle.getFormatStringWithoutDefaulting(locale, key);
+                }
+                return text;
+            }
+
+            @Override
             public boolean equals(Object o) {
                 // Modifications count should not been taken into account in equals() 
                 return super.equals(o);
@@ -48,6 +71,10 @@ final class ResourceBundleFactoryImpl extends ResourceBundleFactory {
                 return super.hashCode();
             }       
         };
+    }
+
+    public ResourceBundleFactory getParentFactory() {
+        return parentFactory;
     }
 
     /**

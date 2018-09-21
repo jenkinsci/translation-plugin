@@ -46,6 +46,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.jelly.ResourceBundleFactory;
 
 /**
  * {@link PageDecorator} that adds the translation dialog.
@@ -55,16 +56,18 @@ import net.sf.json.JSONObject;
 @Extension
 public class L10nDecorator extends PageDecorator {
     public final ContributedL10nStore store = new ContributedL10nStore();
-    private final ResourceBundleFactoryImpl bundleFactory = new ResourceBundleFactoryImpl(store);
     private final Hudson hudson;
+    private ResourceBundleFactoryImpl bundleFactory;
 
     public L10nDecorator() {
         super(L10nDecorator.class);
 
         // hook into Stapler to activate contributed l10n
         hudson = Hudson.getInstance();
-        WebApp.get(hudson.servletContext).getFacet(JellyFacet.class).resourceBundleFactory
-                = bundleFactory;
+        JellyFacet facet = WebApp.get(hudson.servletContext).getFacet(JellyFacet.class);
+        ResourceBundleFactory originFactory = facet.resourceBundleFactory;
+        bundleFactory = new ResourceBundleFactoryImpl(store, originFactory);
+        facet.resourceBundleFactory = bundleFactory;
     }
 
     public List<Locales.Entry> listLocales() {
