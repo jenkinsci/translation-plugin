@@ -45,6 +45,7 @@ translation.post = function(link,lang,onSuccess) {
 // instantiate the Dialog
 translation.createDialog = function() {
     var d = $("l10n-dialog");
+	d.style.textAlign = 'left';
     var l = this.Cookie.get("l10n-locale");
     if(l==null) l=this.detectedLocale;
 
