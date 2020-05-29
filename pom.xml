@@ -10,7 +10,7 @@
   <version>1.17-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Jenkins Translation Assistance plugin</name>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/Translation+Assistance+Plugin</url>
+  <url>https://github.com/jenkinsci/translation-plugin</url>
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
