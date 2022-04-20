@@ -1,0 +1,5 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Adds a dialog box to every page, which enables people to contribute translations for the messages they are seeing in the current page. 
+    Translations are only stored locally.
+</div>
