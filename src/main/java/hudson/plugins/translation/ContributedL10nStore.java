@@ -1,7 +1,7 @@
 package hudson.plugins.translation;
 
 import hudson.Util;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 public class ContributedL10nStore {
-    private final Hudson jenkins = Hudson.getInstance();
+    private final Jenkins jenkins = Jenkins.get();
     private static final Logger LOGGER = Logger.getLogger(ContributedL10nStore.class.getName());
 
     public void loadTo(String locale, String baseName, Properties props) {

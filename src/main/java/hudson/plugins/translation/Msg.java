@@ -39,7 +39,7 @@ public final class Msg {
      * Gets the localized messages for the current request locale.
      */
     public String getLocalizedText() {
-        return resourceBundle.getFormatStringWithoutDefaulting(Stapler.getCurrentRequest().getLocale(),key);
+        return resourceBundle.getFormatStringWithoutDefaulting(Stapler.getCurrentRequest2().getLocale(),key);
     }
 
     /**

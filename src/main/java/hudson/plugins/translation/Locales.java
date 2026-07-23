@@ -35,15 +35,15 @@ public class Locales {
 
             String[] tokens = code.split("_");
             if(tokens.length==1) {
-                this.locale = new Locale(tokens[0]);
+                this.locale = Locale.of(tokens[0]);
             } else {
-                this.locale = new Locale(tokens[0],tokens[1]);
+                this.locale = Locale.of(tokens[0],tokens[1]);
             }
 
         }
 
         public boolean matchesRequestLocale() {
-            return Stapler.getCurrentRequest().getLocale().toString().equals(code);
+            return Stapler.getCurrentRequest2().getLocale().toString().equals(code);
         }
     }
 

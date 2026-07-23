@@ -1,16 +1,12 @@
 package hudson.plugins.translation;
 
-import com.sun.mail.util.BASE64EncoderStream;
 import hudson.Extension;
-import hudson.Util;
 import hudson.plugins.translation.Locales.Entry;
-import hudson.model.Hudson;
 import hudson.model.PageDecorator;
-import hudson.remoting.Base64;
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.WebApp;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -18,21 +14,10 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.kohsuke.stapler.jelly.InternationalizedStringExpressionListener;
 import org.kohsuke.stapler.jelly.JellyFacet;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.CipherInputStream;
-import static javax.crypto.Cipher.ENCRYPT_MODE;
-import static javax.crypto.Cipher.DECRYPT_MODE;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+import jakarta.servlet.ServletException;
 import java.io.BufferedReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
@@ -41,9 +26,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.GZIPInputStream;
 
 import net.sf.json.JSONObject;
 
@@ -56,14 +38,12 @@ import net.sf.json.JSONObject;
 public class L10nDecorator extends PageDecorator {
     public final ContributedL10nStore store = new ContributedL10nStore();
     private final ResourceBundleFactoryImpl bundleFactory = new ResourceBundleFactoryImpl(store);
-    private final Hudson hudson;
 
     public L10nDecorator() {
-        super(L10nDecorator.class);
+        super();
 
         // hook into Stapler to activate contributed l10n
-        hudson = Hudson.getInstance();
-        WebApp.get(hudson.servletContext).getFacet(JellyFacet.class).resourceBundleFactory
+        WebApp.get(Jenkins.get().getServletContext()).getFacet(JellyFacet.class).resourceBundleFactory
                 = bundleFactory;
     }
 
@@ -74,68 +54,53 @@ public class L10nDecorator extends PageDecorator {
     /**
      * Activate the recording of the localized resources.
      */
-    public void startRecording(StaplerRequest request) {
+    public void startRecording(StaplerRequest2 request) {
         request.setAttribute(InternationalizedStringExpressionListener.class.getName(), new MsgRecorder());
     }
 
-    public Collection<Msg> getRecording(StaplerRequest request) {
+    public Collection<Msg> getRecording(StaplerRequest2 request) {
         MsgRecorder recording = (MsgRecorder) request.getAttribute(InternationalizedStringExpressionListener.class.getName());
-        return recording != null ? recording.set : Collections.<Msg>emptySet();
-    }
-
-    public String encodeRecording(StaplerRequest request) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // string -> gzip -> encrypt -> base64 -> string
-        PrintStream w = new PrintStream(new GZIPOutputStream(new CipherOutputStream(baos,getCipher(ENCRYPT_MODE))), 
-            false, "UTF-8");
-        for (Msg e : getRecording(request)) {
-            w.println(e.resourceBundle.getBaseName());
-            w.println(e.key);
-        }
-        w.close();
-
-        return Base64.encode(baos.toByteArray());
+        return recording != null ? recording.set : Collections.emptySet();
     }
 
     /**
-     * Does the opposite of {@link #encodeRecording(StaplerRequest)}.
+     * Encrypts the recorded resource bundle list into an opaque, tamper-proof
+     * token that round-trips through the browser.
      */
-    public List<Msg> decode(StaplerRequest request) throws IOException {
-        final GZIPInputStream gzipInpurStream = new GZIPInputStream(new CipherInputStream(
-                new ByteArrayInputStream(Base64.decode(request.getParameter("bundles"))),
-                getCipher(DECRYPT_MODE)));  
-        final BufferedReader r;
-        try {
-            //TODO: Replace by StandardCharsets in JDK7
-            r = new BufferedReader(new InputStreamReader(gzipInpurStream, "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new IOException("UTF-8 encoding is not supported .This should never happen" +
-                    ", because it's a part of Java standard starting from Java 5", ex);
+    public String encodeRecording(StaplerRequest2 request) {
+        StringBuilder buf = new StringBuilder();
+        for (Msg e : getRecording(request)) {
+            buf.append(e.resourceBundle.getBaseName()).append('\n');
+            buf.append(e.key).append('\n');
         }
-
-        List<Msg> l = new ArrayList<Msg>();
-        String s;
-        while((s=r.readLine())!=null) {
-            l.add(new Msg(bundleFactory.create(s),r.readLine()));
-        }
-        return l;
+        return Secret.fromString(buf.toString()).getEncryptedValue();
     }
 
-    private Cipher getCipher(int mode) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(mode, hudson.getSecretKeyAsAES128());
-            return cipher;
-        } catch (GeneralSecurityException e) {
-            throw new Error(e); // impossible
+    /**
+     * Does the opposite of {@link #encodeRecording(StaplerRequest2)}.
+     */
+    public List<Msg> decode(StaplerRequest2 request) {
+        List<Msg> l = new ArrayList<>();
+        Secret secret = Secret.decrypt(request.getParameter("bundles"));
+        if (secret == null) { // tampered with or not produced by this instance
+            return l;
         }
+        try (BufferedReader r = new BufferedReader(new StringReader(secret.getPlainText()))) {
+            String s;
+            while((s=r.readLine())!=null) {
+                l.add(new Msg(bundleFactory.create(s),r.readLine()));
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e); // StringReader never throws
+        }
+        return l;
     }
 
     /**
      * Looks at {@code Accept-Language} header manually and decide which locale
      * this user is likely capable of translating.
      */
-    public String getPrimaryTranslationLocale(StaplerRequest req) {
+    public String getPrimaryTranslationLocale(StaplerRequest2 req) {
         String lang = req.getHeader("Accept-Language");
         if(lang==null)  return null;
 
@@ -178,22 +143,22 @@ public class L10nDecorator extends PageDecorator {
     }
 
     /**
-     * Handles the submission from the browser.
+     * Handles the submission from the browser, storing the contributed
+     * translations locally on this Jenkins instance.
      */
     @RequirePOST
-    public void doSubmit(StaplerRequest req, StaplerResponse rsp, @QueryParameter String locale) throws IOException, ServletException {
+    public void doSubmit(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter String locale) throws IOException, ServletException {
         JSONObject json = req.getSubmittedForm();
 
-        if (StringUtils.isBlank(locale)){
+        if (locale == null || locale.isBlank()) {
             rsp.sendError(400, "No locale selected");
             return;
         }
 
-        if(hudson.hasPermission(Hudson.ADMINISTER)) {
-            // let this submission reflected to this Hudson right away
-
+        Jenkins jenkins = Jenkins.get();
+        if(jenkins.hasPermission(Jenkins.ADMINISTER)) {
             // organize contributions by baseName
-            Map<String,Properties> updates = new HashMap<String,Properties>();
+            Map<String,Properties> updates = new HashMap<>();
             for (SubmissionEntry e : req.bindJSONToList(SubmissionEntry.class, json.get("entry"))) {
                 if(!e.isUpdated())  continue;
 
@@ -211,18 +176,5 @@ public class L10nDecorator extends PageDecorator {
                 store.save(locale,p.getKey(),p.getValue());
             bundleFactory.clearCache();
         }
-
-        json.remove("bundles"); // we don't need this bulky data send to Hudson project website
-        json.put("id", UUID.randomUUID().toString()); // simplifies the correlation between multiple posting sites
-        json.put("installation", Util.getDigestOf(hudson.getSecretKey()));
-        json.put("version", hudson.VERSION);
-
-        // write back the data that the browser should then submit to the Hudson website
-        rsp.setContentType("text/plain;charset=UTF-8");
-        OutputStreamWriter w = new OutputStreamWriter(new GZIPOutputStream(new BASE64EncoderStream(rsp.getOutputStream())),"UTF-8");
-        json.write(w);
-        w.close();
-
-        rsp.setStatus(SC_OK);
     }
 }

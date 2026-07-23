@@ -23,52 +23,52 @@
  */
 package hudson.plugins.translation;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.Page;
+import org.htmlunit.WebRequest;
+import org.htmlunit.util.NameValuePair;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class L10nDecoratorTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class L10nDecoratorTest {
 
     @Test
     @Issue("SECURITY-507")
-    public void ensurePostIsRequiredForSubmit() throws Exception {
+    void ensurePostIsRequiredForSubmit(JenkinsRule j) throws Exception {
         j.jenkins.setCrumbIssuer(null);
         JenkinsRule.WebClient wc = j.createWebClient();
 
         L10nDecorator l10nDecorator = j.jenkins.getDescriptorByType(L10nDecorator.class);
         String submitUrl = l10nDecorator.getUrl() + "/submit";
-        URL absoluteSubmitUrl = new URL(j.getURL() + submitUrl);
+        URL absoluteSubmitUrl = URI.create(j.getURL() + submitUrl).toURL();
 
         // the GET method is not allowed
         try {
             wc.goTo(submitUrl);
             fail();
         } catch (FailingHttpStatusCodeException e) {
-            Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, e.getStatusCode());
+            assertEquals(HttpURLConnection.HTTP_BAD_METHOD, e.getStatusCode());
         }
 
         // the POST method must be used to submit a form
         WebRequest submitRequest = new WebRequest(absoluteSubmitUrl, HttpMethod.POST);
-        submitRequest.setRequestParameters(Arrays.asList(
+        submitRequest.setRequestParameters(List.of(
                 new NameValuePair("json", "{}"),
                 new NameValuePair("locale", "fr")
         ));
         Page successSubmit = wc.getPage(submitRequest);
-        Assert.assertEquals(HttpStatus.SC_OK, successSubmit.getWebResponse().getStatusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, successSubmit.getWebResponse().getStatusCode());
     }
 }

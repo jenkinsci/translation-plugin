@@ -1,0 +1,6 @@
+<?jelly escape-by-default='true'?>
+<div>
+  This plugin adds a dialog box to every Jenkins page that lets people contribute
+  localizations for the messages shown on the current page, reducing the barrier
+  of entry to localization.
+</div>
