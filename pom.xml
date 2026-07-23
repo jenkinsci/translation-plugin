@@ -30,7 +30,6 @@
   </scm>
 
   <properties>
-    <revision>1.17</revision>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/translation-plugin</gitHubRepo>
     <jenkins.baseline>2.555</jenkins.baseline>
